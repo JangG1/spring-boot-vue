@@ -4,7 +4,7 @@
     <!--right-->
     <div class="right">
         <div class="pList1">
-            <h2>나의쇼핑내역</h2>
+            <h2>나의 쇼핑내역</h2>
         </div>
         <div class="date1">
             <div class="table1st">
@@ -75,19 +75,20 @@
                 </table>
             </div>
             <div class="table1Body">
-                <table style="width:1000px">
+                <table style="width:1000px" v-for="test in tests" :key="test">
                     <!-- 날짜, 검색 정보를 비교하여 화면 목록에 표시 -->
-                    <tr v-for="(item, idx) in users" :key="idx" v-show="compareDate(item) && compareInform(item) " style="height:50px;">
-                        <td class="td1">{{item.orderDate}}</td>
-                        <td class="td2">
-                            <img :src="require(`@/assets/image/${item.img}`)" alt="banner" style="width:50px; height:50px;">
-                        </td>
-                        <td class="td3">{{item.name}}</td>
-                        <td class="td4">{{item.product}}</td>
-                        <td class="td5">{{item.option}}</td>
-                        <td class="td6">{{item.amount}}</td>
-                        <td class="td7">{{AddComma(item.price)}}원</td>
-                        <td class="td8">{{item.charge}}</td>
+                    <!-- v-show="compareDate(orderList) && compareInform(orderList) " style="height:50px;" -->
+                    <tr v-for="order in orders" :key="order" >
+                        <td class="td1">{{order.orderdate}}</td>
+                        <!--<td class="td2">
+                            <img :src="require(`@/assets/image/${order.img}`)" alt="banner" style="width:50px; height:50px;">
+                        </td>-->
+                        <td class="td3">{{order.id}}</td>
+                        <td class="td4">{{test.productname}}</td>
+                        <td class="td5">{{order.selectedoption}}</td>
+                        <td class="td6">{{order.delivery}}</td>
+                        <td class="td7">{{AddComma(order.totalprice)}}원</td>
+                        <td class="td8" rowspan="1">{{order.delivery}}</td>
                     </tr>
                 </table>
             </div>
@@ -116,17 +117,18 @@
             <div class="table2Body">
                 <table style="width:1000px">
                     <tbody>
-                        <tr v-for="(item, asd) in users2" :key="asd" v-show="compareDate(item) && compareInform(item) " class="tr1" style="height:50px;">
-                            <td class="td1">{{item.orderDate}}</td>
-                            <td class="td2">
-                                <!-- <img :src="require(`@/assets/image/${item.img}`)" alt="banner" style="width:50px; height:50px;"> -->
-                            </td>
-                            <td class="td3">{{item.name}}</td>
-                            <td class="td4">{{item.product}}</td>
-                            <td class="td5">{{item.option}}</td>
-                            <td class="td6">{{AddComma(item.price)}}원</td>
-                            <td class="td7">{{item.process}}</td>
-                            <td class="td8">{{item.result}}</td>
+                        <!--v-show="compareDate(cancel) && compareInform(cancel) " class="tr1" style="height:50px;"-->
+                        <tr v-for="cancel in cancels" :key="cancel">
+                            <td class="td1">{{cancel.name}}</td>
+                            <!--<td class="td2">
+                                <img :src="require(`@/assets/image/${cancel.img}`)" alt="banner" style="width:50px; height:50px;">
+                            </td>-->
+                            <td class="td3">{{cancel.name}}</td>
+                            <td class="td4">{{cancel.name}}</td>
+                            <td class="td5">{{cancel.name}}</td>
+                            <td class="td6">{{cancel.name}}</td>
+                            <td class="td7">{{cancel.name}}</td>
+                            <td class="td8">{{cancel.name}}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -137,11 +139,16 @@
 </template>
 
 <script>
-import userList from "@/assets/data/orderList.json"; // 주문내역 제이슨
-import userList2 from "@/assets/data/refundList.json"; // 취소내역 제이슨
+// import userList from "@/assets/data/orderList.json"; // 주문내역 제이슨
+// import userList2 from "@/assets/data/refundList.json"; // 취소내역 제이슨
+import axios from 'axios'
 export default {
     data() {
         return {
+            orders: [],
+            cancels: [],
+            tests:[],
+            test:"",
             startPoint: {
                 year: "1900",
                 month: "01",
@@ -160,20 +167,20 @@ export default {
         }
     },
     // 주문/취소 내역 제이슨
-    name: "userList",
-    name2: "userList2",
-    computed: {
-        users() {
-            return userList.users.map((items) => {
-                return items;
-            })
-        },
-        users2() {
-            return userList2.users2.map((items) => {
-                return items;
-            })
-        }
-    },
+    // name: "userList",
+    // name2: "userList2",
+    // computed: {
+    //     users() {
+    //         return userList.users.map((items) => {
+    //             return items;
+    //         })
+    //     },
+    //     users2() {
+    //         return userList2.users2.map((items) => {
+    //             return items;
+    //         })
+    //     }
+    // },
     methods: {
         // 기간별 주문/취소한 상품 내역 조회를 위한 함수
         getDate() {
@@ -246,6 +253,29 @@ export default {
             var regexp = /\B(?=(\d{3})+(?!\d))/g;
             return num.toString().replace(regexp, ",");
         },
+        getData1 () {
+                axios.get('api/order/all')
+                .then((response) => {
+                    this.orders = response.data
+                })
+            },
+        getData2() {
+            axios.get('/api/member/all')
+                .then((response) => {
+                    this.cancels = response.data
+                })
+        },
+        getData3() {
+            axios.get('api/product/productDetail/all')
+                .then((response) => {
+                    this.tests = response.data
+                })
+        },
+        sendData() {
+            axios.post("/test/send/hong", {
+                send: "56475673"
+            })
+        }
     },
     mounted() {
         {
@@ -256,13 +286,20 @@ export default {
             this.month = this.getMonth();
             this.date = this.getDate();
         }
-    }
+    },
+    created() {
+        this.getData1();
+        this.getData2();
+        this.getData3();
+    },
 }
 </script>
 
 <style scoped>
 .table1Header,
 .table2Header {
+    margin-left: 30px;
+    width: 95%;
     background-color: rgb(0, 153, 255)
 }
 
@@ -272,12 +309,15 @@ export default {
 }
 
 .table1Body {
-    height: 350px;
+    margin-left: 30px;
+    width: 95%;
+    height: 300px;
     overflow-y: scroll;
 }
 
 .table2Body {
-    height: 150px;
+    margin-left: 30px;
+    height: 300px;
     overflow-y: scroll;
 }
 
@@ -313,15 +353,14 @@ export default {
     width: 80px
 }
 
-.date1{
-    width:1000px;
-    display:flex;
+.date1 {
+    width: 1000px;
+    display: flex;
     text-align: center;
     justify-items: center;
 }
 
-
-/* a {
+a {
     text-decoration: none;
     color: inherit;
     margin-left: 15px;
@@ -346,7 +385,7 @@ tr {
 
 .left {
     display: inline-block;
-    height: 1095px;
+    height: 1120px;
     border: 1px solid rgb(197, 195, 195);
     background-color: #fafafa;
     border-radius: 4px;
@@ -359,9 +398,9 @@ tr {
 .right {
     display: inline-block;
     height: 1150px;
-    width: 85%;
+    width: 1100px;
     border: 1px solid rgb(197, 195, 195);
-    margin-left: 50px;
+    margin-left: 20px;
     background-color: #fafafa;
     border-radius: 4px;
 }
@@ -447,22 +486,6 @@ tr {
     padding: 20px;
 }
 
-.table2,
-.table3 {
-    margin-left: auto;
-    margin-right: auto;
-    border-collapse: collapse;
-    text-align: center;
-    background-color: white;
-}
-
-.table2 td,
-.table3 td {
-    border-bottom: 2px solid rgb(184, 181, 181);
-    padding: 7px 4px;
-    font-size: 16px;
-}
-
 .List1 {
     text-align: center;
     padding-top: 15px;
@@ -508,10 +531,10 @@ tr {
 
 }
 
-.tr1 {
+/*.tr1 {
     background-color: rgb(0, 153, 255);
     color: white;
-}
+}*/
 
 #edge1 {
     border-top-left-radius: 8px;
@@ -519,5 +542,5 @@ tr {
 
 #edge2 {
     border-top-right-radius: 8px;
-} */
+}
 </style>
